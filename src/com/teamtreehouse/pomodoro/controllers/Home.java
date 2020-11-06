@@ -2,6 +2,7 @@ package com.teamtreehouse.pomodoro.controllers;
 
 import com.teamtreehouse.pomodoro.model.Attempt;
 import com.teamtreehouse.pomodoro.model.AttemptKind;
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -16,6 +18,7 @@ public class Home {
 
     @FXML private VBox container;
     @FXML private Label title;
+    @FXML private TextArea message;
 
     private Attempt currentAttempt;
     private StringProperty timerText;
@@ -45,18 +48,35 @@ public class Home {
     }
 
     private void prepareAttempt(AttemptKind kind) {
-        clearAttemptStyles();
+        reset();
         currentAttempt = new Attempt(kind, "");
         addAttemptStyle(kind);
         title.setText(kind.getDisplayName());
         setTimerText(currentAttempt.getRemainingSeconds());
-        //TODO: this is creating multiple timelines we need to fix this!
         timeline = new Timeline();
         timeline.setCycleCount(kind.getTotalSeconds());
         timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), e -> {
             currentAttempt.tick();
             setTimerText(currentAttempt.getRemainingSeconds());
         }));
+        timeline.setOnFinished(e ->{
+            saveCurrentAttempt();
+            prepareAttempt(currentAttempt.getKind() == AttemptKind.FOCUS ?
+                            AttemptKind.BREAK : AttemptKind.FOCUS);
+        });
+    }
+
+    private void saveCurrentAttempt() {
+        currentAttempt.setMessage(message.getText());
+        currentAttempt.save();
+    }
+
+    private void reset() {
+        clearAttemptStyles();
+        if (timeline != null &&
+                timeline.getStatus() == Animation.Status.RUNNING) {
+            timeline.stop();
+        }
     }
 
     public void playTimer(){
