@@ -2,12 +2,15 @@ package com.teamtreehouse.pomodoro.controllers;
 
 import com.teamtreehouse.pomodoro.model.Attempt;
 import com.teamtreehouse.pomodoro.model.AttemptKind;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class Home {
 
@@ -16,6 +19,7 @@ public class Home {
 
     private Attempt currentAttempt;
     private StringProperty timerText;
+    private Timeline timeline;
 
     public Home() {
         timerText = new SimpleStringProperty();
@@ -46,6 +50,21 @@ public class Home {
         addAttemptStyle(kind);
         title.setText(kind.getDisplayName());
         setTimerText(currentAttempt.getRemainingSeconds());
+        //TODO: this is creating multiple timelines we need to fix this!
+        timeline = new Timeline();
+        timeline.setCycleCount(kind.getTotalSeconds());
+        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), e -> {
+            currentAttempt.tick();
+            setTimerText(currentAttempt.getRemainingSeconds());
+        }));
+    }
+
+    public void playTimer(){
+        timeline.play();
+    }
+
+    public void pauseTimer(){
+        timeline.pause();
     }
 
     private void addAttemptStyle(AttemptKind kind) {
@@ -62,5 +81,10 @@ public class Home {
 
     public void DEBUG(ActionEvent actionEvent) {
         System.out.println("Hello!");
+    }
+
+    public void handleRestart(ActionEvent actionEvent) {
+        prepareAttempt(AttemptKind.FOCUS);
+        playTimer();
     }
 }
