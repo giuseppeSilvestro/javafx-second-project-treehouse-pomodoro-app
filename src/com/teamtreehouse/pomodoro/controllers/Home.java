@@ -12,10 +12,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 public class Home {
-
+//TODO fix AudioClip
+//    private final AudioClip applause;
     @FXML private VBox container;
     @FXML private Label title;
     @FXML private TextArea message;
@@ -27,6 +29,7 @@ public class Home {
     public Home() {
         timerText = new SimpleStringProperty();
         setTimerText(0);
+//        applause = new AudioClip(getClass().getResource("/sounds.applause.mp3").toExternalForm());
     }
 
     public String getTimerText() {
@@ -61,6 +64,7 @@ public class Home {
         }));
         timeline.setOnFinished(e ->{
             saveCurrentAttempt();
+//            applause.play();
             prepareAttempt(currentAttempt.getKind() == AttemptKind.FOCUS ?
                             AttemptKind.BREAK : AttemptKind.FOCUS);
         });
